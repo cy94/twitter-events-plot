@@ -7,6 +7,13 @@ import java.util.Calendar;
 import app.Tweet;
 import app.TweetCount;
 
+/**
+ * Implementation of the DAO interface
+ * Contains MySQL queries to count tweets
+ * 
+ * @author Chandan Yeshwanth
+ *
+ */
 public class TweetDAO_JDBC implements TweetDAO {
 	Connection dbConnection;
 
@@ -14,6 +21,9 @@ public class TweetDAO_JDBC implements TweetDAO {
 		dbConnection = dbconn;
 	}
 
+	/* (non-Javadoc)
+	 * @see db.TweetDAO#getTweetCount()
+	 */
 	@Override
 	public int getTweetCount() {
 		String sql = "SELECT COUNT(*) as count FROM event_tweet";
@@ -32,6 +42,9 @@ public class TweetDAO_JDBC implements TweetDAO {
 		return count;
 	}
 
+	/* (non-Javadoc)
+	 * @see db.TweetDAO#getTweetCountByKeyword(java.lang.String)
+	 */
 	@Override
 	public ArrayList<TweetCount> getTweetCountByKeyword(String keyword) {
 		String sql = 
@@ -71,6 +84,9 @@ public class TweetDAO_JDBC implements TweetDAO {
 		return results;
 	}
 
+	/* (non-Javadoc)
+	 * @see db.TweetDAO#getTweetCountByKeyword(java.lang.String, java.lang.String, java.lang.String)
+	 */
 	@Override
 	public ArrayList<TweetCount> getTweetCountByKeyword(String keyword,
 			String startDate, String endDate) {

@@ -10,13 +10,20 @@ import java.util.Scanner;
 import db.DAOFactory;
 import db.TweetDAO;
 
+/**
+ * @author Chandan Yeshwanth
+ *
+ */
 public class Main {
 	public static DAOFactory daoFactory = null;
 	public static TweetDAO tweetDAO = null;
 
-	//	prompt the user for keywords to be searched 
-	//	get the counts for these keywords by minute and 
-	//	then plots them using JFreeChart
+	/**
+	 * Plots the IDF-time graph for terms specified by the user
+	 * in a given time range
+	 * 
+	 * @throws IOException
+	 */
 	private static void runApplication() throws IOException{
 		ArrayList<String> keywords = new ArrayList<String>();
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
@@ -29,7 +36,7 @@ public class Main {
 
 		System.out.println("Enter your keywords - (press Enter when done)");
 
-//		read keywords from console - stop reading when Enter pressed with blank line
+		//		read keywords from console - stop reading when Enter pressed with blank line
 		while(true){
 			String str = in.readLine().trim();
 
@@ -50,16 +57,25 @@ public class Main {
 
 		//		get the data series for each keyword in a map
 		HashMap<String, Object> dataSeries = getDataSeries(keywords, startDate, endDate);
-		
+
 		//		add the base line data series (all tweets)
 		System.out.println("Adding base data");
 		ArrayList<TweetCount> baseSeries = tweetDAO.getTweetCountByKeyword("", startDate, endDate);
 
 		LineChart.plot(dataSeries, baseSeries);
-		
+
 		System.out.println("Finished plotting");
 	}
 
+	/**
+	 * Returns the hourly tweet count for each keyword in the specified
+	 * time range
+	 * 
+	 * @param keywords Terms to be plotted
+	 * @param startDate Starting date and time of twitter data (UTC)
+	 * @param endDate Ending date and time of twitter data (UTC)
+	 * @return A term-object map where object returned by getTweetCountByKeyword
+	 */
 	private static HashMap getDataSeries(ArrayList<String> keywords, String startDate, String endDate) {
 		HashMap dataSeries = new HashMap();
 
@@ -72,7 +88,12 @@ public class Main {
 		return dataSeries;
 	}
 
-	//	obtains an instance of the DAO factory and runs the application
+	/**
+	 * obtains an instance of the DAO factory and runs the application
+	 * 
+	 * @param args
+	 * @throws IOException
+	 */
 	public static void main(String[] args) throws IOException {
 		daoFactory = new DAOFactory();
 

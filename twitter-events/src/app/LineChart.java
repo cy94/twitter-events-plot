@@ -25,7 +25,19 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeriesCollection; 
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 
+/**
+ * A class to plot hourly term IDF graph for Twitter keywords
+ * 
+ * @author Chandan Yeshwanth
+ *
+ */
 public class LineChart extends ApplicationFrame {
+	/**
+	 * @param applicationTitle 
+	 * @param chartTitle
+	 * @param dataSeries
+	 * @param baseSeries
+	 */
 	public LineChart( String applicationTitle, String chartTitle,
 			HashMap<String, Object> dataSeries, ArrayList<TweetCount> baseSeries) {
 		super(applicationTitle);
@@ -47,9 +59,17 @@ public class LineChart extends ApplicationFrame {
 		setContentPane( chartPanel ); 
 	}
 
+	/**
+	 * Creates a dataset that JFreeChart can use from an ArrayList
+	 * 
+	 * @param dataSeries 
+	 * @param baseSeries
+	 * @return
+	 */
 	private XYDataset createDataset(HashMap<String, Object> dataSeries, ArrayList<TweetCount> baseSeries) 
 	{
 		TimeSeriesCollection dataset = new TimeSeriesCollection();
+//		
 		HashMap<String, Object> baseSeriesMap = Utility.getBaseMapFromList(baseSeries);
 		
 //		compare occurrences time of keyword to base tweet time as Strings
@@ -74,6 +94,10 @@ public class LineChart extends ApplicationFrame {
 		return dataset;
 	}   
 
+	/**
+	 * @param dataSeries
+	 * @param baseSeries
+	 */
 	public static void plot(HashMap<String, Object> dataSeries, ArrayList<TweetCount> baseSeries) {
 		LineChart chart = new LineChart("Twitter", "Twitter Keyword Trends", dataSeries, baseSeries);
 		chart.pack();

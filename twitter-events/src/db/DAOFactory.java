@@ -3,7 +3,16 @@ package db;
 import java.lang.*;
 import java.sql.*;
 
+/**
+ * A Factory for DAO objects
+ * 
+ * @author Chandan Yeshwanth
+ *
+ */
 public class DAOFactory {
+	/**
+	 * Database details
+	 */
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";  
 	static final String DB_URL = "jdbc:mysql://localhost/twitter";
 	static final String USER = "root";
@@ -19,6 +28,11 @@ public class DAOFactory {
 		activeConnection = false;
 	}
 	
+	/**
+	 * Connects to the MySQL database 
+	 * 
+	 * @throws Exception
+	 */
 	public void activateConnection() throws Exception
 	{
 		if( activeConnection == true )
@@ -38,6 +52,9 @@ public class DAOFactory {
 		}
 	}
 	
+	/**
+	 * Close connection
+	 */
 	public void deactivateConnection()
 	{
 		// Okay to keep deactivating an already deactivated connection
@@ -61,6 +78,12 @@ public class DAOFactory {
 		}
 	}
 	
+	/**
+	 * Implements a singleton pattern for the DAO object 
+	 * 
+	 * @return a TweetDAO_JDBC object
+	 * @throws Exception
+	 */
 	public TweetDAO getTweetDAO() throws Exception
 	{
 		if( activeConnection == false )
