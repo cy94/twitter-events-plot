@@ -29,8 +29,7 @@ public class Main {
 	private static void plotEvents() throws IOException{
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-		ArrayList<String> keywords;
-		HashMap<String, Object> dataSeries = new HashMap<String, Object>();
+		ArrayList<EventData> eventDataList = new ArrayList<EventData>();
 
 		//	for each event
 		while(true) {
@@ -41,6 +40,10 @@ public class Main {
 				break;
 			}
 			else {		
+				HashMap<String, Object> dataSeries;
+				ArrayList<TweetCount> baseSeries;
+				ArrayList<String> keywords;
+
 				//	input time range for Twitter data
 				System.out.println("Enter the start date (yyyy-mm-dd hh:MM)");
 				String startDate = in.readLine().trim();
@@ -52,34 +55,30 @@ public class Main {
 				keywords = getKeywords();
 
 				//	get the data series for each keyword 
-				dataSeries.putAll(getDataSeries(keywords, startDate, endDate));
+				dataSeries = getDataSeries(keywords, startDate, endDate);
+
+				// base series for this event duration
+				System.out.println("Adding base data");
+				baseSeries = tweetDAO.getTweetCountByKeyword("", startDate, endDate);
+				
+				eventDataList.add(new EventData(eventName, dataSeries, baseSeries));
 			}
 		}		
 
-		//		add the base line data series (all tweets)
-		System.out.println("Adding base data");
-		
-		System.out.println("Enter the base series start date (yyyy-mm-dd hh:MM)");
-		String startDate = in.readLine().trim();
-
-		System.out.println("Enter the base series end date (yyyy-mm-dd hh:MM)");
-		String endDate = in.readLine().trim();
-		
-		ArrayList<TweetCount> baseSeries = tweetDAO.getTweetCountByKeyword("", startDate, endDate);
-		
 		System.out.println("Choose X-Axis unit:");
 		System.out.println("1. Minutes from start (0, 60, 120)");
 		System.out.println("2. Time (HH:mm)");
-		
-		
+
 		int choice = Integer.parseInt(in.readLine().trim());
-		
+
+		System.out.println("Plotting ...");
+
 		switch (choice) {
 		case 1:
-			LineChart.plotMinuteGraph(dataSeries, baseSeries);
+			LineChart.plot(eventDataList, LineChart.AxisType.MINUTES_FROM_START);
 			break;
 		case 2:
-			LineChart.plotTimeGraph(dataSeries, baseSeries);
+			LineChart.plot(eventDataList, LineChart.AxisType.TIME);
 			break;
 		default:
 			break;

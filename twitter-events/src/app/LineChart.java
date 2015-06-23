@@ -5,6 +5,7 @@ import java.awt.BasicStroke;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,31 +33,57 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
  *
  */
 public class LineChart extends ApplicationFrame {
+
+	public enum AxisType{
+		//	HH:mm time
+		TIME,
+		//	0 ... 60 ... 120
+		MINUTES_FROM_START
+	}
+
 	/**
 	 * @param applicationTitle 
 	 * @param chartTitle
 	 * @param dataSeries
 	 * @param baseSeries
+	 * @param type 
 	 */
 	public LineChart( String applicationTitle, String chartTitle,
-			HashMap<String, Object> dataSeries, ArrayList<TweetCount> baseSeries) {
-		
+			ArrayList<EventData> eventDataList, AxisType axisType) {
+
 		super(applicationTitle);
-		JFreeChart xylineChart = ChartFactory.createTimeSeriesChart(
-				chartTitle ,
-				"Time" ,
-				"IDF" ,
-				createDataset(dataSeries, baseSeries),
-				true , true , false);
 
+		JFreeChart xylineChart = null;
+
+		//	create the chart based on the X axis type 
+		switch (axisType) {
+		case TIME:
+			System.out.println("TimeSeriesChart");
+
+			xylineChart = ChartFactory.createTimeSeriesChart(
+					chartTitle ,
+					"Time (HH:mm)" ,
+					"IDF" ,
+					createTimeDataset(eventDataList));
+			break;
+		case MINUTES_FROM_START:
+			System.out.println("XYLineChart");
+
+			xylineChart = ChartFactory.createXYLineChart(
+					chartTitle ,
+					"Time from Start (min)" ,
+					"IDF" ,
+					createMinutesDataset(eventDataList));
+			break;
+		default:
+			break;
+		}
+
+		// other chart setup calls
 		ChartPanel chartPanel = new ChartPanel( xylineChart );
-//		chartPanel.setPreferredSize( new java.awt.Dimension( 560 , 367 ) );
-
 		final XYPlot plot = xylineChart.getXYPlot( );
 		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer( );
-
 		plot.setRenderer( renderer ); 
-
 		setContentPane( chartPanel ); 
 	}
 
@@ -67,56 +94,98 @@ public class LineChart extends ApplicationFrame {
 	 * @param baseSeries
 	 * @return dataset
 	 */
-	private XYDataset createDataset(HashMap<String, Object> dataSeries, ArrayList<TweetCount> baseSeries) 
+	private XYDataset createTimeDataset(ArrayList<EventData> eventDataList) 
 	{
-		TimeSeriesCollection dataset = new TimeSeriesCollection();
-		//		
-		HashMap<String, Object> baseSeriesMap = Utility.getBaseMapFromList(baseSeries);
+		TimeSeriesCollection chartDataset = new TimeSeriesCollection();
 
-		//		compare occurrences time of keyword to base tweet time as Strings
+		//	compare keyword occurrence time with base time as Strings
 		DateFormat df = new SimpleDateFormat("HH:mm");
 
-		for(Map.Entry<String, Object> e : dataSeries.entrySet()){
-			TimeSeries series = new TimeSeries(e.getKey());
+		//	for each event
+		for (EventData eventData : eventDataList) {
+			//	convert baseSeries to a map
+			HashMap<String, Object> baseSeriesMap = Utility.getBaseMapFromList(eventData.baseSeries);
 
-			//				for each time period (minute)
-			for(TweetCount tc : (ArrayList<TweetCount>) e.getValue()){
+			// iterate through the map
+			for(Map.Entry<String, Object> e : eventData.dataSeries.entrySet()){
+				// create a timeseries for each keyword (prepend the event name)
+				TimeSeries series = new TimeSeries(eventData.eventName + ": "  + e.getKey());
 
-				//					get the base count for this period
-				int baseCount = (Integer) baseSeriesMap.get(df.format(tc.date));
+				//	for each minute
+				for(TweetCount tc : (ArrayList<TweetCount>) e.getValue()){
+					//	get the base count for this period
+					int baseCount = (Integer) baseSeriesMap.get(df.format(tc.date));
 
-				// add the time-IDF data point to the series		
-				series.add(new Minute(tc.date), Utility.getIDF(baseCount, tc.count));
+					// add the time-IDF data point to the series		
+					series.add(new Minute(tc.date), Utility.getIDF(baseCount, tc.count));
+				}
+
+				//	add the TimeSeries to the collection
+				chartDataset.addSeries(series);
 			}
-			//				add the data series to the set of series
-			dataset.addSeries(series);
 		}
 
-		return dataset;
+		return chartDataset;
+	}   
+
+	/**
+	 * Creates a dataset that JFreeChart can use, from an ArrayList
+	 * 
+	 * @param dataSeries 
+	 * @param baseSeries
+	 * @return dataset
+	 */
+	private XYDataset createMinutesDataset(ArrayList<EventData> eventDataList) 
+	{
+		XYSeriesCollection chartDataset = new XYSeriesCollection();
+
+		//	compare occurrences time of keyword to base tweet time as Strings
+		DateFormat df = new SimpleDateFormat("HH:mm");
+
+		//	for each event
+		for (EventData eventData : eventDataList) {
+			//	convert baseSeries to a map
+			HashMap<String, Object> baseSeriesMap = Utility.getBaseMapFromList(eventData.baseSeries);
+
+			// get the starting time for the dataSeries from the baseSeries for this event
+			Date startTime = Utility.getStartTime(eventData.baseSeries);
+
+			// iterate through the map
+			for(Map.Entry<String, Object> e : eventData.dataSeries.entrySet()){
+
+				// create a timeseries for each keyword (prepend the event name)
+				XYSeries series = new XYSeries(eventData.eventName + ": " + e.getKey());
+
+				//	for each minute
+				for(TweetCount tc : (ArrayList<TweetCount>) e.getValue()){
+					//	get the base count for this period
+					int baseCount = (Integer) baseSeriesMap.get(df.format(tc.date));
+
+					//	find difference in milliseconds, then convert to minutes
+					int minutesFromStart = (int) (tc.date.getTime() - startTime.getTime())/(60 * 1000);
+
+					// add the time-IDF data point to the series		
+					series.add(minutesFromStart, Utility.getIDF(baseCount, tc.count));
+				}
+
+				//	add the TimeSeries to the collection
+				chartDataset.addSeries(series);
+			}
+		}
+
+		return chartDataset;
 	}   
 
 	/**
 	 * @param dataSeries
 	 * @param baseSeries
 	 */
-	public static void plotMinuteGraph(HashMap<String, Object> dataSeries,
-			ArrayList<TweetCount> baseSeries) {
-		LineChart chart = new LineChart("Twitter", "Twitter Keyword Trends", dataSeries, baseSeries);
+	public static void plot(ArrayList<EventData> eventDataList, AxisType axisType) {
+		LineChart chart = new LineChart("Twitter", "Twitter Keyword Trends", eventDataList, axisType);
 		chart.pack();
 		RefineryUtilities.centerFrameOnScreen( chart );          
-		chart.setVisible( true ); 
-		
+		chart.setVisible( true ); 	
 	}
 
-	/**
-	 * @param dataSeries
-	 * @param baseSeries
-	 */
-	public static void plotTimeGraph(HashMap<String, Object> dataSeries,
-			ArrayList<TweetCount> baseSeries) {
-		LineChart chart = new LineChart("Twitter", "Twitter Keyword Trends", dataSeries, baseSeries);
-		chart.pack();
-		RefineryUtilities.centerFrameOnScreen( chart );          
-		chart.setVisible( true ); 
-	}
+
 }

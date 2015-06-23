@@ -3,6 +3,7 @@ package app;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -35,5 +36,22 @@ public class Utility {
 		}
 		
 		return resultMap;
+	}
+
+	/**
+	 * Find the earliest date/time object in series
+	 * 
+	 * @param series - arraylist of TweetCount objects
+	 * @return Date object corresponding to earliest date/time
+	 */
+	public static Date getStartTime(ArrayList<TweetCount> series) {
+		Date minDate = new Date();
+		
+		for (TweetCount tweetCount : series) {
+			if (tweetCount.date.before(minDate)) {
+				minDate = tweetCount.date;
+			}
+		}
+		return minDate;
 	}
 }
