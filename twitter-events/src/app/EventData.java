@@ -17,6 +17,10 @@ import org.omg.CosNaming._BindingIteratorImplBase;
  * @author internship
  *
  */
+/**
+ * @author internship
+ *
+ */
 public class EventData {
 	public String eventName;
 	//	Object is an ArrayList of tweetcount objects
@@ -24,7 +28,13 @@ public class EventData {
 	//	total number of tweets counted per minute
 	public ArrayList<TweetCount> baseSeries;
 
+	public ArrayList<String> keywords;
+	String startDate;
+	String endDate;
+	
 	/**
+	 * only data
+	 * 
 	 * @param _eventName
 	 * @param _dataSeries
 	 * @param _baseSeries
@@ -34,5 +44,22 @@ public class EventData {
 		this.eventName = _eventName;
 		this.dataSeries = _dataSeries;
 		this.baseSeries = _baseSeries;
+	}
+
+	
+	/**
+	 * Only user inputs, no data 
+	 * 
+	 * @param _startDate
+	 * @param _endDate
+	 * @param _keywords
+	 */
+	public EventData(String _eventName, String _startDate, String _endDate,
+			ArrayList<String> _keywords) {
+		// TODO Auto-generated constructor stub
+		this.eventName = _eventName;
+		this.startDate = _startDate;
+		this.endDate = _endDate;
+		this.keywords = _keywords;		
 	}
 }

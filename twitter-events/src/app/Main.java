@@ -21,8 +21,7 @@ public class Main {
 	/**
 	 * Plots the IDF-time graph for terms specified by the user
 	 * in a given time range.
-	 * New: plot multiple events
-	 * todo: Select X-Axis as minutes from start or clock time
+	 * 
 	 * 
 	 * @throws IOException
 	 */
@@ -31,7 +30,7 @@ public class Main {
 
 		ArrayList<EventData> eventDataList = new ArrayList<EventData>();
 
-		//	for each event
+		//	get all inputs
 		while(true) {
 			System.out.println("Enter the event name (press Enter to finish)");
 			String eventName = in.readLine().trim();
@@ -40,10 +39,6 @@ public class Main {
 				break;
 			}
 			else {		
-				HashMap<String, Object> dataSeries;
-				ArrayList<TweetCount> baseSeries;
-				ArrayList<String> keywords;
-
 				//	input time range for Twitter data
 				System.out.println("Enter the start date (yyyy-mm-dd hh:MM)");
 				String startDate = in.readLine().trim();
@@ -52,24 +47,30 @@ public class Main {
 				String endDate = in.readLine().trim();
 
 				// input keywords
-				keywords = getKeywords();
+				ArrayList<String> keywords = getKeywords();
 
-				//	get the data series for each keyword 
-				dataSeries = getDataSeries(keywords, startDate, endDate);
-
-				// base series for this event duration
-				System.out.println("Adding base data");
-				baseSeries = tweetDAO.getTweetCountByKeyword("", startDate, endDate);
-				
-				eventDataList.add(new EventData(eventName, dataSeries, baseSeries));
+				eventDataList.add(new EventData(eventName, startDate, endDate, keywords));
 			}
-		}		
-
+		}	
+		
 		System.out.println("Choose X-Axis unit:");
 		System.out.println("1. Minutes from start (0, 60, 120)");
 		System.out.println("2. Time (HH:mm)");
 
 		int choice = Integer.parseInt(in.readLine().trim());
+		
+		// add data to eventdatalist for each event
+		for (EventData ed : eventDataList) {
+			HashMap<String, Object> dataSeries;
+			ArrayList<TweetCount> baseSeries;
+			
+			//	get the data series for each keyword 
+			ed.dataSeries = getDataSeries(ed.keywords, ed.startDate, ed.endDate);
+
+			// base series for this event duration
+			System.out.println("Adding base data");
+			ed.baseSeries = tweetDAO.getTweetCountByKeyword("", ed.startDate, ed.endDate);
+		}
 
 		System.out.println("Plotting ...");
 
