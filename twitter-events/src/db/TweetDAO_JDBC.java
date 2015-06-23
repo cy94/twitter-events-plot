@@ -4,7 +4,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import app.Tweet;
 import app.TweetCount;
 
 /**
