@@ -1,6 +1,7 @@
 package app;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ public class Main {
 				// input keywords
 				ArrayList<String> keywords = getKeywords();
 
+				// store inputs in EventData object, get twitter data later
 				eventDataList.add(new EventData(eventName, startDate, endDate, keywords));
 			}
 		}	
@@ -67,7 +69,7 @@ public class Main {
 			//	get the data series for each keyword 
 			ed.dataSeries = getDataSeries(ed.keywords, ed.startDate, ed.endDate);
 
-			// base series for this event duration
+			// base series for this event's time interval
 			System.out.println("Adding base data");
 			ed.baseSeries = tweetDAO.getTweetCountByKeyword("", ed.startDate, ed.endDate);
 		}
@@ -123,6 +125,10 @@ public class Main {
 	 * @throws IOException
 	 */
 	public static void main(String[] args) throws IOException {
+//		String filename = "/Users/internship/Desktop/internship/input";
+//		
+//		System.setIn(new FileInputStream(filename));
+		
 		daoFactory = new DAOFactory();
 
 		try {

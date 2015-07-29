@@ -2,6 +2,9 @@ package app;
 
 import java.awt.Color; 
 import java.awt.BasicStroke;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -137,6 +140,18 @@ public class LineChart extends ApplicationFrame {
 	 */
 	private XYDataset createMinutesDataset(ArrayList<EventData> eventDataList) 
 	{
+		PrintWriter writer = null;
+		
+		try {
+			writer = new PrintWriter("/Users/internship/Desktop/internship/data/time_idf/test.csv", "UTF-8");
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		XYSeriesCollection chartDataset = new XYSeriesCollection();
 
 		//	compare occurrences time of keyword to base tweet time as Strings
@@ -144,6 +159,8 @@ public class LineChart extends ApplicationFrame {
 
 		//	for each event
 		for (EventData eventData : eventDataList) {
+			writer.println(eventData.eventName);
+			
 			//	convert baseSeries to a map
 			HashMap<String, Object> baseSeriesMap = Utility.getBaseMapFromList(eventData.baseSeries);
 
@@ -152,7 +169,8 @@ public class LineChart extends ApplicationFrame {
 
 			// iterate through the map
 			for(Map.Entry<String, Object> e : eventData.dataSeries.entrySet()){
-
+				writer.println(eventData.eventName + ": " + e.getKey());
+				
 				// create a timeseries for each keyword (prepend the event name)
 				XYSeries series = new XYSeries(eventData.eventName + ": " + e.getKey());
 
@@ -165,7 +183,10 @@ public class LineChart extends ApplicationFrame {
 					int minutesFromStart = (int) (tc.date.getTime() - startTime.getTime())/(60 * 1000);
 
 					// add the time-IDF data point to the series		
-					series.add(minutesFromStart, Utility.getIDF(baseCount, tc.count));
+					double idf = Utility.getIDF(baseCount, tc.count);
+					writer.println(idf);
+					
+					series.add(minutesFromStart, idf);
 				}
 
 				//	add the TimeSeries to the collection
@@ -173,6 +194,8 @@ public class LineChart extends ApplicationFrame {
 			}
 		}
 
+		writer.close();
+		
 		return chartDataset;
 	}   
 

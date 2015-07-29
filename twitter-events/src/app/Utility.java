@@ -20,7 +20,7 @@ public class Utility {
 	 * @return IDF (Inverse Document Frequency) value
 	 */
 	public static double getIDF(int total, int number){
-		return Math.log(total / number);
+		return Math.log10(total / number);
 	}
 	
 	/**

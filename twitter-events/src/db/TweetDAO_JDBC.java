@@ -95,7 +95,7 @@ public class TweetDAO_JDBC implements TweetDAO {
 						+ 	" from tweet "
 						+ " where "
 						+ 	" LOWER(content) like ? "
-						+ 	" AND "
+						+ 	" AND "	
 						+ 	" creation_date BETWEEN '%s' AND '%s'" 
 						+ " group by "
 						+  	" HOUR(creation_date), MINUTE(creation_date) "
